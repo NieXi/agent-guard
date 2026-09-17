@@ -85,3 +85,14 @@ def test_mcp_destructive_tool():
     out = resp["hookSpecificOutput"]
     assert out["permissionDecision"] == "deny"
     assert "破坏性" in out["permissionDecisionReason"]
+
+
+def test_commit_mentioning_dangerous_word_allowed():
+    payload = json.dumps({
+        "hook_event_name": "PreToolUse",
+        "tool_name": "Bash",
+        "tool_input": {"command": "git commit -m 'fix bug caused by rm -rf in build script'"},
+    })
+    resp = handle_hook_input(payload, mock=True)
+    out = resp["hookSpecificOutput"]
+    assert out["permissionDecision"] == "allow"

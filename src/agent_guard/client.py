@@ -151,22 +151,44 @@ class GuardClient:
 
         # 1. Check Bash commands
         if tool_name.lower() == "bash":
+            import re
             cmd = str(tool_input.get("command", "")).strip()
 
-            for pattern, desc in hard_deny_patterns:
-                if pattern in cmd:
+            # Regex-based precise command matching (handles prefixes like ; && | or beginning of line)
+            hard_deny_regexes = [
+                (r"(?:^|[;&|]\s*)(?:sudo\s+)?rm\s+-[^\s]*[rf]", "严禁执行高危 rm -rf / rm -r 批量删除操作"),
+                (r"(?:^|[;&|]\s*)git\s+reset\s+--hard", "严禁未经确认执行 git reset --hard 回滚操作"),
+                (r"(?:^|[;&|]\s*)git\s+restore\s+\.", "严禁直接执行 git restore . 回滚所有修改"),
+                (r"(?:^|[;&|]\s*)git\s+clean\s+-[^\s]*f", "严禁未经逐个确认执行 git clean 清理未跟踪文件"),
+                (r"(?:^|[;&|]\s*)git\s+push\s+.*(?:-f\b|--force\b)(?!-with-lease)", "禁止使用 --force 强推，请使用 --force-with-lease"),
+                (r"(?:^|[;&|]\s*)mkfs\b", "严禁执行格式化命令"),
+                (r"(?:^|[;&|]\s*)dd\s+if=", "检测到底层磁盘裸写命令"),
+                (r":\(\)\s*\{\s*:\|:&\s*\}\s*;\s*:", "检测到 Fork 炸弹攻击命令"),
+            ]
+
+            ask_regexes = [
+                (r"(?:^|[;&|]\s*)docker\s+compose\s+down\b", "停止/销毁容器服务"),
+                (r"(?:^|[;&|]\s*)(?:sudo\s+)?systemctl\s+stop\b", "停止系统服务"),
+                (r"(?:^|[;&|]\s*)(?:sudo\s+)?reboot\b", "重启系统"),
+                (r"(?:^|[;&|]\s*)(?:sudo\s+)?shutdown\b", "关机"),
+                (r"\bdrop\s+database\b", "删除数据库"),
+                (r"\btruncate\s+table\b", "清空数据表"),
+            ]
+
+            for pattern, desc in hard_deny_regexes:
+                if re.search(pattern, cmd, re.IGNORECASE):
                     return {
                         "decision": "deny",
-                        "reason": f"触犯安全红线: {desc} (命令: {cmd})",
+                        "reason": f"触犯安全红线: {desc} (命中指令: {cmd.splitlines()[0]})",
                         "scores": {"risk_score": 3, "violation_prob": 0.99, "confidence": 1.0},
                         "is_live": False,
                     }
 
-            for pattern, desc in ask_patterns:
-                if pattern in cmd:
+            for pattern, desc in ask_regexes:
+                if re.search(pattern, cmd, re.IGNORECASE):
                     return {
                         "decision": "ask",
-                        "reason": f"操作具备较高副作用: {desc} (命令: {cmd})",
+                        "reason": f"操作具备较高副作用: {desc} (命中指令: {cmd.splitlines()[0]})",
                         "scores": {"risk_score": 2, "violation_prob": 0.50, "confidence": 0.9},
                         "is_live": False,
                     }
