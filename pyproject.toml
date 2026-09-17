@@ -1,0 +1,27 @@
+[project]
+name = "agent-guard"
+version = "0.1.0"
+description = "TypeSafe AI driven agent tool execution guard for Claude Code hooks"
+readme = "README.md"
+authors = [
+    { name = "NieXi", email = "xilemon3@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "pydantic>=2.13.5",
+    "rich>=15.0.0",
+    "typer>=0.27.2",
+    "typesafe-sdk>=0.6.0",
+]
+
+[project.scripts]
+agent-guard = "agent_guard.cli:app"
+
+[build-system]
+requires = ["uv_build>=0.12.15,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
