@@ -59,13 +59,14 @@ def render_evaluation_result(
 
     # Risk level styling
     risk_colors = ["green", "cyan", "yellow", "red"]
-    risk_color = risk_colors[min(risk_score, 3)]
+    idx = max(0, min(int(round(risk_score)), 3))
+    risk_color = risk_colors[idx]
     risk_labels = ["0 - 无害只读", "1 - 受控修改", "2 - 中度风险/关键变动", "3 - 高危不可逆/严重破坏"]
 
     score_table.add_row(
         "破坏性风险 (Score)",
-        f"[{risk_color}]{risk_score} / 3[/{risk_color}]",
-        risk_labels[min(risk_score, 3)],
+        f"[{risk_color}]{risk_score:.2f} / 3[/{risk_color}]",
+        risk_labels[idx],
     )
     score_table.add_row(
         "违规概率 (Noul)",

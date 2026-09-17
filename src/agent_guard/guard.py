@@ -72,8 +72,15 @@ def handle_hook_input(
         }
     }
 
-    # Optional Audit Logging
-    log_path = audit_log or os.getenv("AGENT_GUARD_LOG")
+    # Audit Logging (default to ~/.claude/agent-guard.log)
+    env_log = os.getenv("AGENT_GUARD_LOG")
+    if audit_log:
+        log_path = audit_log
+    elif env_log:
+        log_path = None if env_log.lower() in ("none", "off", "0") else env_log
+    else:
+        log_path = os.path.expanduser("~/.claude/agent-guard.log")
+
     if log_path:
         _write_audit_log(
             log_path=log_path,
