@@ -13,9 +13,23 @@
   - **破坏性风险 (`destructive_risk` - Score)**：四级阶梯场景判定（只读 ➔ 受控常规修改 ➔ 服务重启/中度风险 ➔ 破坏性/不可逆高危）。
   - **安全守则合规 (`policy_violation` - Noul)**：二元概率判断是否触犯安全红线。
   - **执行裁决 (`decision` - Choice)**：`allow`（直接放行）、`ask`（需人工确认）、`deny`（拦截阻止）。
-- ⚡ **智能安全兜底 (Heuristic Fallback)**：即使无网络或未配置 `TYPESAFE_API_KEY`，内置的高精度安全规则引擎也会守卫核心红线（拦截 `rm -rf`、`git reset --hard`、`git restore .`、系统敏感文件篡改等）。
+- ⚡ **Fail-Safe 安全保护**：在未配置 Key 或遭遇格式异常时自动执行安全兜底，坚决防止未知命令静默绕过。支持离线 `--mock` 快速测试与演示。
 - 📊 **Rich 彩色终端报告**：提供直观的命令调试面板，展示各维度指标、概率分布与决策依据。
 - 📝 **审计日志支持**：配置 `AGENT_GUARD_LOG` 环境变量可持久化所有工具调用的审核轨迹（JSONL 格式）。
+
+---
+
+## 安装方式
+
+推荐使用 `uv tool` 全局安装（环境隔离且自动注入 PATH）：
+
+```bash
+# 推荐方式
+uv tool install agent-guard
+
+# 或使用 pipx
+pipx install agent-guard
+```
 
 ---
 
@@ -23,14 +37,15 @@
 
 ### 1. 查看配置建议
 
-在项目目录下执行：
 ```bash
+agent-guard setup
+# 或源码开发时使用
 uv run agent-guard setup
 ```
 
 ### 2. 添加到 Claude Code 配置
 
-在项目根目录 `.claude/settings.json`（仅对本项目生效）或 `~/.claude/settings.json`（全局生效）中添加：
+在你的全局配置 `~/.claude/settings.json`（对所有项目生效）或项目根目录 `.claude/settings.json` 中添加：
 
 ```json
 {
@@ -56,22 +71,25 @@ uv run agent-guard setup
 
 ```bash
 # 测试只读安全命令 -> 输出 ALLOW
-uv run agent-guard check --cmd "git status"
+agent-guard check --cmd "git status"
 
 # 测试高危破坏性命令 -> 输出 DENY 并说明原因
-uv run agent-guard check --cmd "git reset --hard HEAD~1"
+agent-guard check --cmd "git reset --hard HEAD~1"
 
 # 测试涉及服务的变动 -> 输出 ASK 建议人工确认
-uv run agent-guard check --cmd "docker compose down"
+agent-guard check --cmd "docker compose down"
 
 # 测试敏感系统文件篡改 -> 输出 DENY 拦截
-uv run agent-guard check --tool Write --input '{"file_path": "/etc/sudoers", "content": "test"}'
+agent-guard check --tool Write --input '{"file_path": "/etc/sudoers", "content": "test"}'
+
+# 离线模拟测试（无需 API Key）
+agent-guard check --mock --cmd "git reset --hard HEAD~1"
 ```
 
 ### 2. 模拟 Hook 管道输入 (stdin)
 
 ```bash
-echo '{"hook_event_name": "PreToolUse", "tool_name": "Bash", "tool_input": {"command": "git diff"}}' | uv run agent-guard hook
+echo '{"hook_event_name": "PreToolUse", "tool_name": "Bash", "tool_input": {"command": "git diff"}}' | agent-guard hook
 ```
 
 输出：
@@ -80,18 +98,17 @@ echo '{"hook_event_name": "PreToolUse", "tool_name": "Bash", "tool_input": {"com
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
     "permissionDecision": "allow",
-    "permissionDecisionReason": "[TypeSafe Guard] 常规 Bash 命令，无高危或破坏性特征"
+    "permissionDecisionReason": "[TypeSafe Guard] TypeSafe 评估安全通过 (风险等级: 0/3, 置信度: 98.0%)"
   }
 }
 ```
 
 ### 3. 配置 TypeSafe API Key
 
-在环境或者 `.env` 中配置：
+在系统环境或者 `~/.zshrc` / `.bashrc` 中配置：
 ```bash
 export TYPESAFE_API_KEY="your_api_key_here"
 ```
-未配置时将自动启用本地规则防护引擎。
 
 ---
 

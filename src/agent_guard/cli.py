@@ -111,9 +111,25 @@ def check_cmd(
 @app.command(name="setup")
 def setup_cmd():
     """打印如何将 agent-guard 配置到 Claude Code settings.json 的说明。"""
+    import shutil
+
+    has_global_binary = shutil.which("agent-guard") is not None
     curr_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-    config_snippet = {
+    # Preferred command for installed package
+    global_snippet = {
+        "hooks": {
+            "PreToolUse": [
+                {
+                    "matcher": "Bash|Write|Edit",
+                    "command": "agent-guard hook",
+                }
+            ]
+        }
+    }
+
+    # Dev/local command
+    local_snippet = {
         "hooks": {
             "PreToolUse": [
                 {
@@ -126,11 +142,20 @@ def setup_cmd():
 
     console.print()
     console.print("[bold green]=== Claude Code PreToolUse Hook 配置指南 ===[/bold green]")
-    console.print("在你的项目根目录 [cyan].claude/settings.json[/cyan] 或全局 [cyan]~/.claude/settings.json[/cyan] 中添加：")
+    console.print("在你的项目根目录 [cyan].claude/settings.json[/cyan] 或全局 [cyan]~/.claude/settings.json[/cyan] 中添加以下配置：")
     console.print()
-    console.print_json(json.dumps(config_snippet, indent=2))
+
+    console.print("[bold yellow]方式一：标准全局模式（推荐，通过 uv tool install agent-guard 安装）[/bold yellow]")
+    console.print_json(json.dumps(global_snippet, indent=2))
     console.print()
-    console.print("[dim]提示：你也可以配置环境变量 AGENT_GUARD_LOG 指向日志文件以记录所有审核轨迹。[/dim]")
+
+    console.print("[bold cyan]方式二：本地源码开发模式（直接指向当前源码目录）[/bold cyan]")
+    console.print_json(json.dumps(local_snippet, indent=2))
+    console.print()
+
+    console.print("[dim]提示：[/dim]")
+    console.print("[dim]  1. 确保已配置环境变量: export TYPESAFE_API_KEY=\"your_key\"[/dim]")
+    console.print("[dim]  2. 可配置 AGENT_GUARD_LOG 自定义审查轨迹日志路径 (默认 ~/.claude/agent-guard.log)[/dim]")
     console.print()
 
 
