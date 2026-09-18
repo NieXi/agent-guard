@@ -163,6 +163,8 @@ def setup_cmd():
     console.print("[cyan]     echo 'TYPESAFE_API_KEY=\"your_key_here\"' > ~/.agentguardrc[/cyan]")
     console.print("[dim]     （亦支持环境变量 export TYPESAFE_API_KEY=\"your_key\"）[/dim]")
     console.print("[dim]  2. 可配置 AGENT_GUARD_LOG 自定义审查轨迹日志路径 (默认 ~/.claude/agent-guard.log)[/dim]")
+    console.print("[dim]  3. 建议将 Claude Code 保持在 Manual 模式 (状态栏 ⏸ manual mode on，配置值 default)：[/dim]")
+    console.print("[dim]     ask 档弹出带原因的原生确认框；deny 在任何权限模式 (含 bypassPermissions) 下都强制拦截[/dim]")
     console.print()
 
 

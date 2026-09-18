@@ -72,6 +72,15 @@ uv run agent-guard setup
 - **`matcher`**：指定需要拦截审核的工具（推荐拦截 `Bash|Write|Edit|NotebookEdit|mcp__.*`，覆盖终端命令、文件写入以及全量 MCP 工具）。
 - **`hooks[].command`**：Claude Code 在执行这些工具前，会自动将调用参数经 `stdin` 喂给 `agent-guard hook`。
 
+### 3. 权限模式：建议使用 Manual 模式
+
+建议将 Claude Code 保持在 **Manual 模式**（状态栏显示 `⏸ manual mode on`；配置值为 `default`，CLI 标签与 `manual` 别名自 Claude Code v2.1.200 起，可用 `claude --permission-mode manual` 或 `"defaultMode": "manual"` 设置）。该模式下 Claude Code 在大多数编辑、Shell、网络操作前都会征询确认，本 hook 的 `ask` 决策会弹出带原因的原生确认框，且该确认框不会附带"切换到 auto 模式"的快捷选项。
+
+其他权限模式下 hook 依然全程生效，安全语义不变：
+
+- **`deny`**：在包括 `bypassPermissions` / `--dangerously-skip-permissions` 在内的任何模式下都强制拦截，无法通过切换权限模式绕过；
+- **`ask`**：在无提示面的场景（`dontAsk`、无人值守 headless `-p` 会话）不会被静默放行，而是自动转为**拒绝**（fail-closed）。
+
 ---
 
 ## CLI 命令使用
