@@ -26,7 +26,7 @@ def test_destructive_reset_command():
     resp = handle_hook_input(payload, mock=True)
     out = resp["hookSpecificOutput"]
     assert out["permissionDecision"] == "deny"
-    assert "高危破坏性操作" in out["permissionDecisionReason"]
+    assert "拦截" in out["permissionDecisionReason"]
 
 
 def test_destructive_restore_command():
@@ -38,7 +38,7 @@ def test_destructive_restore_command():
     resp = handle_hook_input(payload, mock=True)
     out = resp["hookSpecificOutput"]
     assert out["permissionDecision"] == "deny"
-    assert "高危破坏性操作" in out["permissionDecisionReason"]
+    assert "拦截" in out["permissionDecisionReason"]
 
 
 def test_medium_risk_service_down():
@@ -61,7 +61,7 @@ def test_sensitive_file_modification():
     resp = handle_hook_input(payload, mock=True)
     out = resp["hookSpecificOutput"]
     assert out["permissionDecision"] == "deny"
-    assert "高危破坏性操作" in out["permissionDecisionReason"]
+    assert "拦截" in out["permissionDecisionReason"]
 
 
 def test_mcp_readonly_tool():
@@ -84,7 +84,7 @@ def test_mcp_destructive_tool():
     resp = handle_hook_input(payload, mock=True)
     out = resp["hookSpecificOutput"]
     assert out["permissionDecision"] == "deny"
-    assert "高危破坏性操作" in out["permissionDecisionReason"]
+    assert "拦截" in out["permissionDecisionReason"]
 
 
 def test_commit_mentioning_dangerous_word_allowed():
@@ -133,7 +133,7 @@ def test_direct_rm_rf_command_denied():
     resp = handle_hook_input(payload, mock=True)
     out = resp["hookSpecificOutput"]
     assert out["permissionDecision"] == "deny"
-    assert "高危破坏性操作" in out["permissionDecisionReason"]
+    assert "拦截" in out["permissionDecisionReason"]
 
 
 def test_unconfigured_api_key_failsafe():
