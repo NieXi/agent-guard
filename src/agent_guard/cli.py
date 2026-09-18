@@ -50,16 +50,9 @@ def hook_cmd(
             audit_log=audit_log,
         )
 
-        # Print JSON response to stdout for Claude Code
+        # Print JSON response to stdout for Claude Code;
+        # exit 0 让 Claude Code 解析 hookSpecificOutput 中的 allow/ask/deny 决策
         print(json.dumps(response, ensure_ascii=False))
-        sys.stdout.flush()
-
-        # If denied, return exit code 0 so Claude Code parses hookSpecificOutput,
-        # or exit code 2 if strict blocking is desired.
-        decision = response.get("hookSpecificOutput", {}).get("permissionDecision")
-        if decision == "deny":
-            # Exit code 0 with permissionDecision: "deny" is standard Claude Code protocol
-            sys.exit(0)
         sys.exit(0)
 
     except Exception as e:
@@ -111,39 +104,23 @@ def check_cmd(
 @app.command(name="setup")
 def setup_cmd():
     """打印如何将 agent-guard 配置到 Claude Code settings.json 的说明。"""
-    import shutil
-
-    has_global_binary = shutil.which("agent-guard") is not None
     curr_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-    # Preferred command for installed package
-    global_snippet = {
-        "hooks": {
-            "PreToolUse": [
-                {
-                    "matcher": "Bash|Write|Edit|NotebookEdit|mcp__.*",
-                    "hooks": [{"type": "command", "command": "agent-guard hook"}],
-                }
-            ]
+    def _hook_snippet(command: str) -> dict:
+        return {
+            "hooks": {
+                "PreToolUse": [
+                    {
+                        "matcher": "Bash|Write|Edit|NotebookEdit|mcp__.*",
+                        "hooks": [{"type": "command", "command": command}],
+                    }
+                ]
+            }
         }
-    }
 
-    # Dev/local command
-    local_snippet = {
-        "hooks": {
-            "PreToolUse": [
-                {
-                    "matcher": "Bash|Write|Edit|NotebookEdit|mcp__.*",
-                    "hooks": [
-                        {
-                            "type": "command",
-                            "command": f"uv run --project {curr_dir} agent-guard hook",
-                        }
-                    ],
-                }
-            ]
-        }
-    }
+    # 标准全局模式（uv tool install 安装后的命令）/ 本地源码开发模式（uv run 指向源码目录）
+    global_snippet = _hook_snippet("agent-guard hook")
+    local_snippet = _hook_snippet(f"uv run --project {curr_dir} agent-guard hook")
 
     console.print()
     console.print("[bold green]=== Claude Code PreToolUse Hook 配置指南 ===[/bold green]")
@@ -168,9 +145,5 @@ def setup_cmd():
     console.print()
 
 
-def main():
-    app()
-
-
 if __name__ == "__main__":
-    main()
+    app()
