@@ -154,7 +154,9 @@ def setup_cmd():
     console.print()
 
     console.print("[dim]提示：[/dim]")
-    console.print("[dim]  1. 确保已配置环境变量: export TYPESAFE_API_KEY=\"your_key\"[/dim]")
+    console.print("[dim]  1. 配置 API Key（推荐写入配置文件，一劳永逸）：[/dim]")
+    console.print("[cyan]     echo 'TYPESAFE_API_KEY=\"your_key_here\"' > ~/.agentguardrc[/cyan]")
+    console.print("[dim]     （亦支持环境变量 export TYPESAFE_API_KEY=\"your_key\"）[/dim]")
     console.print("[dim]  2. 可配置 AGENT_GUARD_LOG 自定义审查轨迹日志路径 (默认 ~/.claude/agent-guard.log)[/dim]")
     console.print()
 

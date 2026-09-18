@@ -136,7 +136,12 @@ def test_direct_rm_rf_command_denied():
     assert "拦截" in out["permissionDecisionReason"]
 
 
-def test_unconfigured_api_key_failsafe():
+def test_unconfigured_api_key_failsafe(monkeypatch):
+    monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
+    # Ensure no rc file is detected in current dir
+    from agent_guard import config
+    monkeypatch.setattr(config, "load_config", lambda: {})
+
     payload = json.dumps({
         "hook_event_name": "PreToolUse",
         "tool_name": "Bash",
@@ -145,7 +150,7 @@ def test_unconfigured_api_key_failsafe():
     resp = handle_hook_input(payload, api_key="", mock=False)
     out = resp["hookSpecificOutput"]
     assert out["permissionDecision"] == "deny"
-    assert "未配置 TYPESAFE_API_KEY" in out["permissionDecisionReason"]
+    assert "未检测到 TYPESAFE_API_KEY" in out["permissionDecisionReason"]
 
 
 def test_invalid_json_payload():
@@ -167,3 +172,15 @@ def test_safe_internal_tools_bypassed():
         out = resp["hookSpecificOutput"]
         assert out["permissionDecision"] == "allow"
         assert "无害任务调度" in out["permissionDecisionReason"]
+
+
+def test_load_key_from_rc_content(tmp_path, monkeypatch):
+    monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
+    rc_file = tmp_path / ".agentguardrc"
+    rc_file.write_text("# Config\nTYPESAFE_API_KEY=test_rc_key_12345\n", encoding="utf-8")
+
+    from agent_guard import config
+    monkeypatch.setattr(config, "find_rc_file", lambda: rc_file)
+
+    client = GuardClient(api_key=None)
+    assert client.api_key == "test_rc_key_12345"

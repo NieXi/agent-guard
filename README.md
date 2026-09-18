@@ -105,7 +105,15 @@ echo '{"hook_event_name": "PreToolUse", "tool_name": "Bash", "tool_input": {"com
 
 ### 3. 配置 TypeSafe API Key
 
-在系统环境或者 `~/.zshrc` / `.bashrc` 中配置：
+支持以下两种配置方式（推荐配置文件方式，免除子进程环境变量丢失困扰）：
+
+**方式一：写入全局配置文件 `~/.agentguardrc`（推荐）**
+```bash
+echo 'TYPESAFE_API_KEY="your_api_key_here"' > ~/.agentguardrc
+```
+（亦支持在项目根目录下创建 `./.agentguardrc` 实现项目级隔离配置）
+
+**方式二：配置系统环境变量**
 ```bash
 export TYPESAFE_API_KEY="your_api_key_here"
 ```

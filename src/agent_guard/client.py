@@ -9,12 +9,14 @@ from typing import Any, Dict, Optional
 from typesafe_sdk import TypeSafeClient, SystemOneResponse
 from typesafe_sdk import Score, Choice
 
+from agent_guard.config import get_api_key
+
 
 class GuardClient:
     """Evaluates agent tool calls purely using TypeSafe System One API."""
 
     def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key if api_key is not None else os.getenv("TYPESAFE_API_KEY")
+        self.api_key = get_api_key(api_key)
 
     def evaluate_tool_call(
         self,
@@ -48,7 +50,7 @@ class GuardClient:
         if not self.api_key:
             return {
                 "decision": "deny",
-                "reason": "未配置 TYPESAFE_API_KEY，系统已设定为完全依赖 TypeSafe AI 审查，请设置环境变量 TYPESAFE_API_KEY",
+                "reason": "未检测到 TYPESAFE_API_KEY，请设置环境变量 TYPESAFE_API_KEY 或在 ~/.agentguardrc 中配置",
                 "scores": {"risk_score": 3.0, "confidence": 1.0},
                 "is_live": False,
             }
