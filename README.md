@@ -1,4 +1,4 @@
-# TypeSafe Agent Tool Guard (agent-guard)
+# cmd-guard · TypeSafe Agent Tool Guard
 
 基于 **TypeSafe AI (System One / Jev)** 的 Agent 工具调用安全合规守卫与评估器，专为 **Claude Code `PreToolUse` Hook** 深度定制。
 
@@ -25,11 +25,15 @@
 
 ```bash
 # 推荐方式
-uv tool install agent-guard
+uv tool install cmd-guard
 
 # 或使用 pipx
-pipx install agent-guard
+pipx install cmd-guard
 ```
+
+> PyPI 项目页：<https://pypi.org/project/cmd-guard/> · GitHub 仓库：<https://github.com/NieXi/agent-guard>
+>
+> 安装后的命令名为 `agent-guard`（PyPI 发行名与命令名不同）。
 
 ---
 

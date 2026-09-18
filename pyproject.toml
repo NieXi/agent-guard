@@ -1,5 +1,5 @@
 [project]
-name = "agent-guard"
+name = "cmd-guard"
 version = "0.1.0"
 description = "TypeSafe AI driven agent tool execution guard for Claude Code hooks"
 readme = "README.md"
@@ -37,6 +37,10 @@ agent-guard = "agent_guard.cli:app"
 [build-system]
 requires = ["uv_build>=0.12.15,<0.13.0"]
 build-backend = "uv_build"
+
+[tool.uv.build-backend]
+# PyPI 发行名为 cmd-guard，但模块目录保持 src/agent_guard
+module-name = "agent_guard"
 
 [dependency-groups]
 dev = [
