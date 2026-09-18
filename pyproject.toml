@@ -1,6 +1,6 @@
 [project]
 name = "cmd-guard"
-version = "0.1.0"
+version = "0.1.1"
 description = "TypeSafe AI driven agent tool execution guard for Claude Code hooks"
 readme = "README.md"
 license = "MIT"
