@@ -153,3 +153,17 @@ def test_invalid_json_payload():
     out = resp["hookSpecificOutput"]
     assert out["permissionDecision"] == "deny"
     assert "无效的 JSON" in out["permissionDecisionReason"]
+
+
+def test_safe_internal_tools_bypassed():
+    for safe_tool in ["TaskCreate", "TaskUpdate", "AskUserQuestion", "Read", "Grep", "ToolSearch"]:
+        payload = json.dumps({
+            "hook_event_name": "PreToolUse",
+            "tool_name": safe_tool,
+            "tool_input": {"description": "准备执行数据库清理", "prompt": "清理过期备份"},
+        })
+        # Even without API Key, these should be 0ms allowed without calling network
+        resp = handle_hook_input(payload, api_key="", mock=False)
+        out = resp["hookSpecificOutput"]
+        assert out["permissionDecision"] == "allow"
+        assert "无害任务调度" in out["permissionDecisionReason"]

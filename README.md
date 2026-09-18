@@ -52,7 +52,7 @@ uv run agent-guard setup
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash|Write|Edit",
+        "matcher": "Bash|Write|Edit|NotebookEdit|mcp__.*",
         "command": "agent-guard hook"
       }
     ]
@@ -60,7 +60,7 @@ uv run agent-guard setup
 }
 ```
 
-- **`matcher`**：指定需要拦截审核的工具（推荐拦截 `Bash|Write|Edit`）。
+- **`matcher`**：指定需要拦截审核的工具（推荐拦截 `Bash|Write|Edit|NotebookEdit|mcp__.*`，覆盖终端命令、文件写入以及全量 MCP 工具）。
 - **`command`**：Claude Code 在执行这些工具前，会自动将调用参数经 `stdin` 喂给 `agent-guard hook`。
 
 ---

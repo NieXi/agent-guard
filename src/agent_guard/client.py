@@ -29,6 +29,19 @@ class GuardClient:
         if mock_response is not None:
             return mock_response
 
+        # 纯内部任务调度、交互及只读工具属于零风险操作，0ms 直接放行，避免网络开销与虚假警报
+        SAFE_INTERNAL_TOOLS = {
+            "taskcreate", "taskupdate", "taskget", "tasklist", "taskoutput", "taskstop",
+            "askuserquestion", "read", "grep", "glob", "toolsearch", "listagents", "schedulewakeup",
+        }
+        if tool_name.lower() in SAFE_INTERNAL_TOOLS:
+            return {
+                "decision": "allow",
+                "reason": f"{tool_name} 属于 Agent 内部无害任务调度与只读交互，直接放行",
+                "scores": {"risk_score": 0.0, "confidence": 1.0},
+                "is_live": False,
+            }
+
         if mock:
             return self._mock_evaluate(tool_name, tool_input)
 

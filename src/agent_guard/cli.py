@@ -121,7 +121,7 @@ def setup_cmd():
         "hooks": {
             "PreToolUse": [
                 {
-                    "matcher": "Bash|Write|Edit",
+                    "matcher": "Bash|Write|Edit|NotebookEdit|mcp__.*",
                     "command": "agent-guard hook",
                 }
             ]
@@ -133,7 +133,7 @@ def setup_cmd():
         "hooks": {
             "PreToolUse": [
                 {
-                    "matcher": "Bash|Write|Edit",
+                    "matcher": "Bash|Write|Edit|NotebookEdit|mcp__.*",
                     "command": f"uv run --project {curr_dir} agent-guard hook",
                 }
             ]
